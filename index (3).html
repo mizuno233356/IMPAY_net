@@ -1,0 +1,822 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>IMPAY - Pembayaran Digital</title>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+    :root {
+      --main-color: #FF6B9D;
+      --gradient: linear-gradient(135deg, #FF6B9D 0%, #FF8CB2 100%);
+      --bg-gradient: linear-gradient(135deg, #FFE4EB 0%, #FFD1DA 100%);
+    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body {
+      font-family: Arial, sans-serif;
+      background: var(--bg-gradient);
+      color: #333;
+    }
+    @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+    @keyframes fadeUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes bounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-10px); } }
+    
+    /* Welcome Page */
+    .welcome-page {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: var(--bg-gradient);
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      z-index: 1000;
+      animation: fadeIn 0.5s ease-out;
+    }
+    .welcome-emoji {
+      position: absolute;
+      top: 1rem;
+      left: 1rem;
+      font-size: 2rem;
+      animation: bounce 1s infinite;
+    }
+    .welcome-logo {
+      position: absolute;
+      top: 1rem;
+      right: 1rem;
+      font-size: 1.5rem;
+      font-weight: bold;
+      color: var(--main-color);
+    }
+    .welcome-content {
+      text-align: center;
+      padding: 1rem;
+      max-width: 500px;
+      margin: 0 auto;
+    }
+    .welcome-content h1 {
+      font-size: 2.5rem;
+      margin-bottom: 1rem;
+      color: var(--main-color);
+      animation: fadeUp 0.8s ease-out;
+    }
+    .welcome-content p {
+      font-size: 1.2rem;
+      margin-bottom: 2rem;
+      color: #666;
+      animation: fadeUp 0.8s ease-out 0.3s forwards;
+      opacity: 0;
+    }
+    .welcome-button {
+      background: var(--main-color);
+      color: white;
+      border: none;
+      padding: 0.8rem 1.5rem;
+      border-radius: 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      transition: transform 0.2s;
+      animation: fadeUp 0.8s ease-out 0.6s forwards;
+      opacity: 0;
+    }
+    .welcome-button:hover {
+      transform: scale(1.05);
+    }
+    
+    /* Main Page (initially hidden) */
+    .main-page {
+      display: none;
+      opacity: 0;
+      animation: fadeIn 0.8s ease-out forwards;
+    }
+    
+    /* Main Layout */
+    header {
+      background: var(--gradient);
+      color: #fff;
+      padding: 1rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .logo { 
+      font-size: 1.5rem; 
+      font-weight: bold;
+      display: flex;
+      align-items: center;
+    }
+    .logo-emoji {
+      font-size: 1.5rem;
+      margin-right: 0.5rem;
+      animation: bounce 1s infinite;
+    }
+    .status {
+      font-size: 0.9rem;
+      margin-left: 1rem;
+    }
+    main { padding: 1rem; }
+    .hero { text-align: center; margin: 2rem 0; }
+    .hero h1 {
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out forwards;
+      animation-delay: 0.5s;
+    }
+    .hero .cta {
+      background: #fff;
+      color: var(--main-color);
+      padding: 0.8rem 1.2rem;
+      border: none;
+      border-radius: 2rem;
+      font-size: 1rem;
+      cursor: pointer;
+      box-shadow: 0 4px 6px rgba(0,0,0,0.1);
+      opacity: 0;
+      animation: fadeUp 0.8s ease-out forwards;
+      animation-delay: 0.8s;
+    }
+    .quick-access { display: grid; gap: 1rem; }
+    @media (min-width: 768px) { .quick-access { grid-template-columns: repeat(3,1fr); } }
+    @media (min-width: 1024px) { .quick-access { grid-template-columns: repeat(5,1fr); } }
+    .card {
+      background: #fff;
+      padding: 1rem;
+      border-radius: 1rem;
+      text-align: center;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.1);
+      cursor: pointer;
+      opacity: 0;
+      animation: fadeUp 0.6s ease-out forwards;
+    }
+    .card:nth-child(1) { animation-delay: 1s; }
+    .card:nth-child(2) { animation-delay: 1.2s; }
+    .card:nth-child(3) { animation-delay: 1.4s; }
+    .card:nth-child(4) { animation-delay: 1.6s; }
+    .card:nth-child(5) { animation-delay: 1.8s; }
+    .card i {
+      font-size: 2rem;
+      margin-bottom: 0.5rem;
+      transition: transform 0.3s;
+    }
+    .card:hover i { transform: scale(1.2) rotate(5deg); }
+    .card .name { font-weight: bold; margin-bottom: 0.3rem; }
+    .card .desc { font-size: 0.9rem; color: #666; margin-bottom: 0.5rem; }
+    .btn-buy {
+      background: var(--main-color);
+      color: #fff;
+      border: none;
+      padding: 0.5rem 1rem;
+      border-radius: 1rem;
+      cursor: pointer;
+      transition: transform 0.2s;
+    }
+    .btn-buy:hover { transform: scale(1.05); }
+    
+    /* Purchase Form Modal */
+    .modal {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0,0,0,0.5);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+    .modal-content {
+      background: white;
+      padding: 2rem;
+      border-radius: 1rem;
+      width: 90%;
+      max-width: 500px;
+      max-height: 90vh;
+      overflow-y: auto;
+    }
+    .modal-header {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 1rem;
+    }
+    .modal-title {
+      font-size: 1.5rem;
+      color: var(--main-color);
+    }
+    .close-modal {
+      background: none;
+      border: none;
+      font-size: 1.5rem;
+      cursor: pointer;
+      color: #666;
+    }
+    .form-group {
+      margin-bottom: 1rem;
+    }
+    .form-group label {
+      display: block;
+      margin-bottom: 0.5rem;
+      font-weight: bold;
+    }
+    .form-group select, .form-group input {
+      width: 100%;
+      padding: 0.8rem;
+      border: 1px solid #ddd;
+      border-radius: 0.5rem;
+      font-size: 1rem;
+    }
+    .form-submit {
+      background: var(--main-color);
+      color: white;
+      border: none;
+      padding: 1rem;
+      border-radius: 0.5rem;
+      width: 100%;
+      font-size: 1rem;
+      cursor: pointer;
+      margin-top: 1rem;
+      transition: transform 0.2s;
+    }
+    .form-submit:hover {
+      transform: scale(1.02);
+    }
+    .price-display {
+      font-size: 1.2rem;
+      font-weight: bold;
+      color: var(--main-color);
+      text-align: center;
+      margin: 1rem 0;
+      padding: 1rem;
+      background: #FFF0F5;
+      border-radius: 0.5rem;
+      border: 1px dashed var(--main-color);
+    }
+    
+    footer {
+      text-align: center;
+      padding: 1rem;
+      font-size: 0.9rem;
+      position: relative;
+    }
+    .report-bug {
+      color: var(--main-color);
+      text-decoration: none;
+      margin-top: 0.5rem;
+      display: inline-block;
+    }
+    .report-bug i {
+      margin-right: 0.3rem;
+    }
+  </style>
+</head>
+<body>
+  <!-- Welcome Page (shown first) -->
+  <div class="welcome-page" id="welcomePage">
+    <span class="welcome-emoji">💗</span>
+    <span class="welcome-logo">IMPAY</span>
+    <div class="welcome-content">
+      <h1>Selamat Datang di IMPAY</h1>
+      <p>Nikmati kemudahan isi pulsa & kuota di sini!</p>
+      <button class="welcome-button" id="welcomeButton">Mulai Sekarang</button>
+    </div>
+  </div>
+
+  <!-- Main Page (hidden initially) -->
+  <div class="main-page" id="mainPage">
+    <header>
+      <div class="logo"><span class="logo-emoji">💗</span> IMPAY</div>
+      <div class="status" id="status"></div>
+    </header>
+
+    <main>
+      <section class="hero">
+        <h1>IMPAY - Pembayaran Digital</h1>
+        <button class="cta" onclick="showProductModal('general', 'Mulai Transaksi')">Mulai Transaksi</button>
+      </section>
+
+      <section class="quick-access">
+        <div class="card" onclick="showProductModal('e-wallet', 'E-Wallet')">
+          <i class="fas fa-wallet"></i>
+          <div class="name">E-Wallet</div>
+          <div class="desc">Bayar & Top-up: Dana, GoPay, OVO, ShopeePay, LinkAja</div>
+          <button class="btn-buy">Beli</button>
+        </div>
+        <div class="card" onclick="showProductModal('pulsa', 'Pulsa')">
+          <i class="fas fa-mobile-alt"></i>
+          <div class="name">Pulsa</div>
+          <div class="desc">Isi pulsa: Telkomsel, XL, Indosat, Tri, Smartfren, Axis</div>
+          <button class="btn-buy">Beli</button>
+        </div>
+        <div class="card" onclick="showProductModal('data', 'Paket Data')">
+          <i class="fas fa-wifi"></i>
+          <div class="name">Paket Data</div>
+          <div class="desc">Kuota internet untuk semua operator</div>
+          <button class="btn-buy">Beli</button>
+        </div>
+        <div class="card" onclick="showProductModal('token', 'Token Listrik')">
+          <i class="fas fa-bolt"></i>
+          <div class="name">Token Listrik</div>
+          <div class="desc">Token PLN Prabayar & Tagihan Pascabayar</div>
+          <button class="btn-buy">Beli</button>
+        </div>
+        <div class="card" onclick="showProductModal('bill', 'Tagihan & Lainnya')">
+          <i class="fas fa-file-invoice"></i>
+          <div class="name">Tagihan & Lainnya</div>
+          <div class="desc">PDAM, BPJS, Pajak, Asuransi, TV Berlangganan</div>
+          <button class="btn-buy">Beli</button>
+        </div>
+      </section>
+    </main>
+
+    <!-- Purchase Form Modal -->
+    <div class="modal" id="purchaseModal">
+      <div class="modal-content">
+        <div class="modal-header">
+          <h2 class="modal-title" id="modalTitle">Beli Produk</h2>
+          <button class="close-modal" onclick="closeModal()">&times;</button>
+        </div>
+        <form id="purchaseForm">
+          <div class="form-group" id="operatorGroup">
+            <label for="operator">Pilih Operator:</label>
+            <select id="operator" onchange="updatePackages()">
+              <option value="">-- Pilih Operator --</option>
+              <option value="telkomsel">Telkomsel</option>
+              <option value="xl">XL Axiata</option>
+              <option value="indosat">Indosat</option>
+              <option value="tri">Tri (3)</option>
+              <option value="smartfren">Smartfren</option>
+              <option value="axis">Axis</option>
+            </select>
+          </div>
+          
+          <div class="form-group" id="productGroup">
+            <label for="product">Pilih Produk:</label>
+            <select id="product" onchange="updatePackages()">
+              <option value="">-- Pilih Produk --</option>
+            </select>
+          </div>
+          
+          <div class="form-group" id="packageGroup">
+            <label for="package">Pilih Paket:</label>
+            <select id="package" onchange="updatePrice()">
+              <option value="">-- Pilih Paket --</option>
+            </select>
+          </div>
+          
+          <div class="form-group">
+            <label for="customerNumber">Nomor Pelanggan:</label>
+            <input type="text" id="customerNumber" placeholder="Contoh: 081234567890" required>
+          </div>
+          
+          <div class="price-display" id="priceDisplay">
+            <div>Total Pembayaran:</div>
+            <div id="priceAmount">Rp 0</div>
+          </div>
+          
+          <button type="button" class="form-submit" onclick="submitPurchase()">Pesan via WhatsApp</button>
+        </form>
+      </div>
+    </div>
+
+    <footer>
+      &copy; 2025 IMPAY. All rights reserved.
+      <a href="#" class="report-bug" onclick="redirectToDevWhatsApp();">
+        <i class="fas fa-bug"></i> Laporkan Bug
+      </a>
+    </footer>
+  </div>
+
+  <script>
+    // Welcome Screen Logic
+    document.addEventListener('DOMContentLoaded', function() {
+      if (!localStorage.getItem('impayFirstVisit')) {
+        document.getElementById('welcomePage').style.display = 'flex';
+        localStorage.setItem('impayFirstVisit', 'true');
+      } else {
+        showMainPage();
+      }
+    });
+    
+    function showMainPage() {
+      document.getElementById('welcomePage').style.display = 'none';
+      document.getElementById('mainPage').style.display = 'block';
+    }
+    
+    document.getElementById('welcomeButton').addEventListener('click', showMainPage);
+
+    // Real-time status dengan jam operasional
+    function updateStatus() {
+      const now = new Date();
+      const hour = now.getHours();
+      const openHour = 7;
+      const closeHour = 22;
+      const isOpen = hour >= openHour && hour < closeHour;
+      const label = isOpen ? 'Buka Sekarang' : 'Tutup Sekarang';
+      const statusEl = document.getElementById('status');
+      statusEl.textContent = `${label} (07:00 - 22:00 WIB)`;
+    }
+    setInterval(updateStatus, 60000);
+    updateStatus();
+
+    // Modal Functions
+    let currentProductType = '';
+    
+    function showProductModal(productType, productName) {
+      currentProductType = productType;
+      document.getElementById('modalTitle').textContent = `Beli ${productName}`;
+      document.getElementById('purchaseModal').style.display = 'flex';
+      
+      // Reset form
+      document.getElementById('purchaseForm').reset();
+      document.getElementById('priceAmount').textContent = 'Rp 0';
+      
+      // Show/hide relevant fields based on product type
+      const operatorGroup = document.getElementById('operatorGroup');
+      const productGroup = document.getElementById('productGroup');
+      const packageGroup = document.getElementById('packageGroup');
+      
+      if (productType === 'e-wallet') {
+        operatorGroup.style.display = 'none';
+        productGroup.style.display = 'block';
+        packageGroup.style.display = 'none';
+        
+        // Populate e-wallet products
+        const productSelect = document.getElementById('product');
+        productSelect.innerHTML = `
+          <option value="">-- Pilih E-Wallet --</option>
+          <option value="dana">DANA</option>
+          <option value="gopay">GoPay</option>
+          <option value="ovo">OVO</option>
+          <option value="shopeepay">ShopeePay</option>
+          <option value="linkaja">LinkAja</option>
+        `;
+      } else if (productType === 'pulsa') {
+        operatorGroup.style.display = 'block';
+        productGroup.style.display = 'none';
+        packageGroup.style.display = 'block';
+        updatePackages();
+      } else if (productType === 'data') {
+        operatorGroup.style.display = 'block';
+        productGroup.style.display = 'none';
+        packageGroup.style.display = 'block';
+        updatePackages();
+      } else if (productType === 'token') {
+        operatorGroup.style.display = 'none';
+        productGroup.style.display = 'none';
+        packageGroup.style.display = 'block';
+        
+        // Populate token listrik packages
+        const packageSelect = document.getElementById('package');
+        packageSelect.innerHTML = `
+          <option value="">-- Pilih Nominal --</option>
+          <option value="20k" data-price="20500">20K (Rp 20.500)</option>
+          <option value="50k" data-price="50500">50K (Rp 50.500)</option>
+          <option value="100k" data-price="100500">100K (Rp 100.500)</option>
+          <option value="200k" data-price="200500">200K (Rp 200.500)</option>
+        `;
+      } else if (productType === 'bill') {
+        operatorGroup.style.display = 'none';
+        productGroup.style.display = 'block';
+        packageGroup.style.display = 'block';
+        
+        // Populate bill products
+        const productSelect = document.getElementById('product');
+        productSelect.innerHTML = `
+          <option value="">-- Pilih Tagihan --</option>
+          <option value="bpjs">BPJS Kesehatan</option>
+          <option value="pdam">PDAM</option>
+          <option value="tv">TV Berlangganan</option>
+          <option value="game">Voucher Game</option>
+        `;
+      }
+    }
+    
+    function closeModal() {
+      document.getElementById('purchaseModal').style.display = 'none';
+    }
+    
+    // Product Data - Fixed and organized according to your complete list
+    const productData = {
+      pulsa: {
+        telkomsel: [
+          { name: "5K (Rp 7.700)", value: "5k", price: 7700 },
+          { name: "10K (Rp 12.200)", value: "10k", price: 12200 },
+          { name: "20K (Rp 21.700)", value: "20k", price: 21700 },
+          { name: "50K (Rp 51.200)", value: "50k", price: 51200 },
+          { name: "100K (Rp 100.500)", value: "100k", price: 100500 }
+        ],
+        xl: [
+          { name: "5K (Rp 7.500)", value: "5k", price: 7500 },
+          { name: "10K (Rp 12.000)", value: "10k", price: 12000 },
+          { name: "20K (Rp 21.500)", value: "20k", price: 21500 },
+          { name: "50K (Rp 51.000)", value: "50k", price: 51000 },
+          { name: "100K (Rp 100.000)", value: "100k", price: 100000 }
+        ],
+        indosat: [
+          { name: "5K (Rp 7.600)", value: "5k", price: 7600 },
+          { name: "10K (Rp 12.100)", value: "10k", price: 12100 },
+          { name: "20K (Rp 21.600)", value: "20k", price: 21600 },
+          { name: "50K (Rp 51.100)", value: "50k", price: 51100 },
+          { name: "100K (Rp 100.200)", value: "100k", price: 100200 }
+        ],
+        tri: [
+          { name: "5K (Rp 7.300)", value: "5k", price: 7300 },
+          { name: "10K (Rp 11.800)", value: "10k", price: 11800 },
+          { name: "20K (Rp 21.300)", value: "20k", price: 21300 },
+          { name: "50K (Rp 50.800)", value: "50k", price: 50800 },
+          { name: "100K (Rp 99.800)", value: "100k", price: 99800 }
+        ],
+        smartfren: [
+          { name: "5K (Rp 7.400)", value: "5k", price: 7400 },
+          { name: "10K (Rp 11.900)", value: "10k", price: 11900 },
+          { name: "20K (Rp 21.400)", value: "20k", price: 21400 },
+          { name: "50K (Rp 50.900)", value: "50k", price: 50900 },
+          { name: "100K (Rp 99.900)", value: "100k", price: 99900 }
+        ],
+        axis: [
+          { name: "5K (Rp 7.400)", value: "5k", price: 7400 },
+          { name: "10K (Rp 11.900)", value: "10k", price: 11900 },
+          { name: "20K (Rp 21.400)", value: "20k", price: 21400 },
+          { name: "50K (Rp 50.900)", value: "50k", price: 50900 },
+          { name: "100K (Rp 99.900)", value: "100k", price: 99900 }
+        ]
+      },
+      data: {
+        telkomsel: [
+          { name: "1.5GB/1 Hari (Rp 8.500)", value: "1.5gb-1hari", price: 8500 },
+          { name: "3GB/3 Hari (Rp 18.000)", value: "3gb-3hari", price: 18000 },
+          { name: "8GB/30 Hari (Rp 42.000)", value: "8gb-30hari", price: 42000 },
+          { name: "12GB/30 Hari (Rp 58.000)", value: "12gb-30hari", price: 58000 },
+          { name: "25GB/30 Hari (Rp 85.000)", value: "25gb-30hari", price: 85000 }
+        ],
+        xl: [
+          { name: "1.5GB/1 Hari (Rp 7.000)", value: "1.5gb-1hari", price: 7000 },
+          { name: "3GB/3 Hari (Rp 15.000)", value: "3gb-3hari", price: 15000 },
+          { name: "6GB/30 Hari (Rp 32.000)", value: "6gb-30hari", price: 32000 },
+          { name: "12GB/30 Hari (Rp 52.000)", value: "12gb-30hari", price: 52000 },
+          { name: "25GB/30 Hari (Rp 75.000)", value: "25gb-30hari", price: 75000 }
+        ],
+        indosat: {
+          freedom_harian: [
+            { name: "1.5GB/1 Hari (Rp 7.500)", value: "1.5gb-1hari", price: 7500 },
+            { name: "1GB/2 Hari (Rp 8.000)", value: "1gb-2hari", price: 8000 },
+            { name: "3GB/1 Hari (Rp 12.000)", value: "3gb-1hari", price: 12000 },
+            { name: "5GB/2 Hari (Rp 12.000)", value: "5gb-2hari", price: 12000 },
+            { name: "3GB/3 Hari (Rp 16.000)", value: "3gb-3hari", price: 16000 },
+            { name: "2.5GB/5 Hari (Rp 15.000)", value: "2.5gb-5hari", price: 15000 },
+            { name: "5GB/3 Hari (Rp 17.000)", value: "5gb-3hari", price: 17000 },
+            { name: "3.5GB/5 Hari (Rp 16.000)", value: "3.5gb-5hari", price: 16000 },
+            { name: "5GB/5 Hari (Rp 21.000)", value: "5gb-5hari", price: 21000 },
+            { name: "7GB/7 Hari (Rp 28.000)", value: "7gb-7hari", price: 28000 },
+            { name: "15GB/3 Hari (Rp 32.000)", value: "15gb-3hari", price: 32000 },
+            { name: "15GB/7 Hari (Rp 35.000)", value: "15gb-7hari", price: 35000 }
+          ],
+          freedom_bulanan: [
+            { name: "3GB/28 Hari (Rp 24.000)", value: "3gb-28hari", price: 24000 },
+            { name: "4GB/28 Hari (Rp 29.000)", value: "4gb-28hari", price: 29000 },
+            { name: "5.5GB/28 Hari (Rp 35.000)", value: "5.5gb-28hari", price: 35000 },
+            { name: "7GB/28 Hari (Rp 38.000)", value: "7gb-28hari", price: 38000 },
+            { name: "9GB/28 Hari (Rp 47.000)", value: "9gb-28hari", price: 47000 },
+            { name: "13GB/28 Hari (Rp 55.000)", value: "13gb-28hari", price: 55000 },
+            { name: "25GB/28 Hari (Rp 66.000)", value: "25gb-28hari", price: 66000 },
+            { name: "30GB/28 Hari (Rp 95.000)", value: "30gb-28hari", price: 95000 },
+            { name: "52GB/28 Hari (Rp 119.000)", value: "52gb-28hari", price: 119000 },
+            { name: "100GB/28 Hari (Rp 156.000)", value: "100gb-28hari", price: 156000 },
+            { name: "150GB/28 Hari (Rp 144.000)", value: "150gb-28hari", price: 144000 },
+            { name: "200GB/28 Hari (Rp 200.000)", value: "200gb-28hari", price: 200000 }
+          ]
+        },
+        tri: [
+          { name: "2GB/1 Hari (Rp 6.000)", value: "2gb-1hari", price: 6000 },
+          { name: "4GB/3 Hari (Rp 12.000)", value: "4gb-3hari", price: 12000 },
+          { name: "8GB/30 Hari (Rp 28.000)", value: "8gb-30hari", price: 28000 },
+          { name: "16GB/30 Hari (Rp 45.000)", value: "16gb-30hari", price: 45000 },
+          { name: "32GB/30 Hari (Rp 68.000)", value: "32gb-30hari", price: 68000 }
+        ],
+        smartfren: [
+          { name: "1GB + 1GB Chat/7 Hari (Rp 13.000)", value: "1gb-1gbchat-7hari", price: 13000 },
+          { name: "1.5GB + 1GB Chat/7 Hari (Rp 14.000)", value: "1.5gb-1gbchat-7hari", price: 14000 },
+          { name: "4GB/30 Hari (Rp 23.000)", value: "4gb-30hari", price: 23000 },
+          { name: "8GB/30 Hari (Rp 30.000)", value: "8gb-30hari", price: 30000 },
+          { name: "6GB + 5GB App/30 Hari (Rp 41.500)", value: "6gb-5gbapp-30hari", price: 41500 },
+          { name: "12GB + 15GB App/30 Hari (Rp 58.000)", value: "12gb-15gbapp-30hari", price: 58000 },
+          { name: "20GB + 10GB App/30 Hari (Rp 85.500)", value: "20gb-10gbapp-30hari", price: 85500 },
+          { name: "32GB + 15GB App/30 Hari (Rp 119.500)", value: "32gb-15gbapp-30hari", price: 119500 },
+          { name: "44GB + 15GB App/30 Hari (Rp 144.500)", value: "44gb-15gbapp-30hari", price: 144500 }
+        ],
+        axis: {
+          mini: [
+            { name: "1.5GB/1 Hari (Rp 8.000)", value: "1.5gb-1hari", price: 8000 },
+            { name: "2.5GB/1 Hari (Rp 9.000)", value: "2.5gb-1hari", price: 9000 },
+            { name: "2.5GB/2 Hari (Rp 14.000)", value: "2.5gb-2hari", price: 14000 },
+            { name: "7GB/7 Hari (Rp 26.000)", value: "7gb-7hari", price: 26000 },
+            { name: "8.5GB/7 Hari (Rp 30.000)", value: "8.5gb-7hari", price: 30000 },
+            { name: "5GB/15 Hari (Rp 32.000)", value: "5gb-15hari", price: 32000 },
+            { name: "6GB/7 Hari (Rp 34.000)", value: "6gb-7hari", price: 34000 },
+            { name: "8GB/15 Hari (Rp 47.000)", value: "8gb-15hari", price: 47000 },
+            { name: "30GB/15 Hari (Rp 74.000)", value: "30gb-15hari", price: 74000 }
+          ],
+          bronet: [
+            { name: "2GB/30 Hari (Rp 18.000)", value: "2gb-30hari", price: 18000 },
+            { name: "3GB/30 Hari (Rp 23.000)", value: "3gb-30hari", price: 23000 },
+            { name: "6GB/30 Hari (Rp 34.000)", value: "6gb-30hari", price: 34000 },
+            { name: "8GB/30 Hari (Rp 42.000)", value: "8gb-30hari", price: 42000 },
+            { name: "14GB/30 Hari (Rp 61.000)", value: "14gb-30hari", price: 61000 },
+            { name: "20GB/30 Hari (Rp 77.000)", value: "20gb-30hari", price: 77000 },
+            { name: "30GB/30 Hari (Rp 93.000)", value: "30gb-30hari", price: 93000 },
+            { name: "35GB/60 Hari (Rp 109.000)", value: "35gb-60hari", price: 109000 },
+            { name: "75GB/60 Hari (Rp 166.000)", value: "75gb-60hari", price: 166000 }
+          ],
+          mini_ss: [
+            { name: "2GB/3 Hari (Rp 12.000)", value: "2gb-3hari", price: 12000 },
+            { name: "3GB/3 Hari (Rp 13.500)", value: "3gb-3hari", price: 13500 },
+            { name: "2.5GB/3 Hari (Rp 13.500)", value: "2.5gb-3hari", price: 13500 },
+            { name: "1GB/5 Hari (Rp 14.500)", value: "1gb-5hari", price: 14500 },
+            { name: "9GB/3 Hari (Rp 17.000)", value: "9gb-3hari", price: 17000 },
+            { name: "4GB/5 Hari (Rp 17.500)", value: "4gb-5hari", price: 17500 },
+            { name: "7.5GB/5 Hari (Rp 23.500)", value: "7.5gb-5hari", price: 23500 },
+            { name: "12GB/5 Hari (Rp 28.000)", value: "12gb-5hari", price: 28000 },
+            { name: "20GB/7 Hari (Rp 43.500)", value: "20gb-7hari", price: 43500 }
+          ],
+          sosial_media: [
+            { name: "2GB Nat + 3GB Lokal/5 Hari (Rp 7.000)", value: "2gbnat-3gblokal-5hari", price: 7000 },
+            { name: "1GB/1.5GB/30 Hari (Rp 8.500)", value: "1gb-1.5gb-30hari", price: 8500 },
+            { name: "4GB Nat + 6GB Lokal/5 Hari (Rp 10.500)", value: "4gbnat-6gblokal-5hari", price: 10500 },
+            { name: "2GB/3GB/30 Hari (Rp 12.000)", value: "2gb-3gb-30hari", price: 12000 }
+          ],
+          youtube: [
+            { name: "1GB YouTube/30 Hari (Rp 6.500)", value: "1gb-youtube-30hari", price: 6500 },
+            { name: "2GB YouTube/30 Hari (Rp 12.500)", value: "2gb-youtube-30hari", price: 12500 }
+          ]
+        }
+      },
+      bill: {
+        bpjs: [
+          { name: "Kelas 1 (Rp 150.000)", value: "kelas1", price: 150000 },
+          { name: "Kelas 2 (Rp 100.000)", value: "kelas2", price: 100000 },
+          { name: "Kelas 3 (Rp 42.000)", value: "kelas3", price: 42000 }
+        ],
+        game: [
+          { name: "Mobile Legends (Rp 15.000)", value: "mobile-legends", price: 15000 },
+          { name: "PUBG Mobile (Rp 20.000)", value: "pubg", price: 20000 },
+          { name: "Free Fire (Rp 15.000)", value: "free-fire", price: 15000 },
+          { name: "Genshin Impact (Rp 30.000)", value: "genshin-impact", price: 30000 }
+        ],
+        tv: [
+          { name: "IndiHome (Rp 300.000)", value: "indihome", price: 300000 },
+          { name: "First Media (Rp 350.000)", value: "first-media", price: 350000 },
+          { name: "MNC Vision (Rp 250.000)", value: "mnc-vision", price: 250000 }
+        ]
+      }
+    };
+    
+    function updatePackages() {
+      const operator = document.getElementById('operator').value;
+      const product = document.getElementById('product').value;
+      const packageSelect = document.getElementById('package');
+      
+      packageSelect.innerHTML = '<option value="">-- Pilih Paket --</option>';
+      
+      if (currentProductType === 'pulsa') {
+        if (operator && productData.pulsa[operator]) {
+          productData.pulsa[operator].forEach(pkg => {
+            packageSelect.innerHTML += `<option value="${pkg.value}" data-price="${pkg.price}">${pkg.name}</option>`;
+          });
+        }
+      } else if (currentProductType === 'data') {
+        if (operator === 'indosat') {
+          // Special case for Indosat with multiple data products
+          packageSelect.innerHTML = `
+            <option value="">-- Pilih Jenis Paket --</option>
+            <option value="freedom_harian">Freedom Harian</option>
+            <option value="freedom_bulanan">Freedom Bulanan</option>
+          `;
+        } else if (operator === 'axis') {
+          // Special case for Axis with multiple data products
+          packageSelect.innerHTML = `
+            <option value="">-- Pilih Jenis Paket --</option>
+            <option value="mini">Data Mini</option>
+            <option value="bronet">Data Bronet</option>
+            <option value="mini_ss">Data Mini SS</option>
+            <option value="sosial_media">Paket Sosial Media</option>
+            <option value="youtube">Paket YouTube</option>
+          `;
+        } else if (operator && productData.data[operator]) {
+          if (Array.isArray(productData.data[operator])) {
+            productData.data[operator].forEach(pkg => {
+              packageSelect.innerHTML += `<option value="${pkg.value}" data-price="${pkg.price}">${pkg.name}</option>`;
+            });
+          }
+        }
+      } else if (currentProductType === 'bill') {
+        if (product && productData.bill[product]) {
+          productData.bill[product].forEach(pkg => {
+            packageSelect.innerHTML += `<option value="${pkg.value}" data-price="${pkg.price}">${pkg.name}</option>`;
+          });
+        }
+      }
+      
+      // Handle sub-categories for Indosat and Axis
+      const packageValue = packageSelect.value;
+      if (operator === 'indosat' && packageValue) {
+        const subPackages = productData.data.indosat[packageValue];
+        if (subPackages) {
+          packageSelect.innerHTML = '<option value="">-- Pilih Paket --</option>';
+          subPackages.forEach(pkg => {
+            packageSelect.innerHTML += `<option value="${pkg.value}" data-price="${pkg.price}">${pkg.name}</option>`;
+          });
+        }
+      } else if (operator === 'axis' && packageValue) {
+        const subPackages = productData.data.axis[packageValue];
+        if (subPackages) {
+          packageSelect.innerHTML = '<option value="">-- Pilih Paket --</option>';
+          subPackages.forEach(pkg => {
+            packageSelect.innerHTML += `<option value="${pkg.value}" data-price="${pkg.price}">${pkg.name}</option>`;
+          });
+        }
+      }
+    }
+    
+    function updatePrice() {
+      const packageSelect = document.getElementById('package');
+      const selectedOption = packageSelect.options[packageSelect.selectedIndex];
+      const price = selectedOption ? selectedOption.getAttribute('data-price') : 0;
+      
+      document.getElementById('priceAmount').textContent = `Rp ${price ? parseInt(price).toLocaleString('id-ID') : '0'}`;
+    }
+    
+    function submitPurchase() {
+      const operator = document.getElementById('operator').value;
+      const product = document.getElementById('product').value;
+      const packageSelect = document.getElementById('package');
+      const selectedPackage = packageSelect.options[packageSelect.selectedIndex];
+      const packageName = selectedPackage ? selectedPackage.text : '';
+      const packageValue = selectedPackage ? selectedPackage.value : '';
+      const price = selectedPackage ? selectedPackage.getAttribute('data-price') : '0';
+      const customerNumber = document.getElementById('customerNumber').value;
+      
+      if (!customerNumber) {
+        alert('Harap masukkan nomor pelanggan');
+        return;
+      }
+      
+      if (currentProductType === 'data' && (!operator || !packageValue)) {
+        alert('Harap pilih operator dan paket');
+        return;
+      }
+      
+      if (currentProductType === 'pulsa' && (!operator || !packageValue)) {
+        alert('Harap pilih operator dan nominal pulsa');
+        return;
+      }
+      
+      if (currentProductType === 'token' && !packageValue) {
+        alert('Harap pilih nominal token');
+        return;
+      }
+      
+      if (currentProductType === 'bill' && (!product || !packageValue)) {
+        alert('Harap pilih produk dan paket');
+        return;
+      }
+      
+      let productName = '';
+      if (currentProductType === 'pulsa') {
+        productName = `Pulsa ${operator} ${packageName.split('(')[0].trim()}`;
+      } else if (currentProductType === 'data') {
+        productName = `Paket Data ${operator} ${packageName.split('(')[0].trim()}`;
+      } else if (currentProductType === 'token') {
+        productName = `Token Listrik ${packageName.split('(')[0].trim()}`;
+      } else if (currentProductType === 'e-wallet') {
+        productName = `Top-up ${product}`;
+      } else if (currentProductType === 'bill') {
+        productName = `${product} ${packageName.split('(')[0].trim()}`;
+      }
+      
+      const message = `Yey kak, aku pengen banget beli ${productName}\nMakasih kak, semoga hari kakak seceria aku dapet kuota~ (｡♥‿♥｡)`;
+      
+      redirectToWhatsApp(productName, message);
+      closeModal();
+    }
+    
+    // Redirect transaksi via WhatsApp
+    function redirectToWhatsApp(product, message) {
+      const phone = '6285894095873';
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+    
+    // Redirect laporan bug/error ke developer
+    function redirectToDevWhatsApp() {
+      const phone = '628388392178';
+      const message = 'Permisi, saya mau melaporkan bug atau error pada aplikasi IMPAY.';
+      window.open(`https://wa.me/${phone}?text=${encodeURIComponent(message)}`, '_blank');
+    }
+  </script>
+</body>
+</html>
